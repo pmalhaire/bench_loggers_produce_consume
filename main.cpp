@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <stdexcept>
 #include <queue>
+#include <iostream>
 #include "spdlog/sinks/stdout_sinks.h"
 
 using namespace std;
@@ -17,7 +18,6 @@ auto produceLog = spdlog::stdout_logger_st("produce");
 auto consumeLog = spdlog::stdout_logger_st("consume");
 
 constexpr auto MESSAGE_COUNT = 1000000ul;
-auto consumed = 0ul;
 
 template <typename T>
 class SynchronizedQueue
@@ -53,7 +53,7 @@ public:
 
 SynchronizedQueue<int> syncQueue;
 
-void produceThread()
+void produceThreadSpd()
 {
     produceLog->info("start");
     for (auto i = 0; i < MESSAGE_COUNT; i++)
@@ -63,47 +63,91 @@ void produceThread()
     }
 }
 
-void consumeThread()
+void consumeThreadSpd()
 {
     consumeLog->info("start");
     for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
         auto elem = syncQueue.pop();
-        consumeLog->info("Consuming one {}", elem);
-        consumed++;
+        consumeLog->info("Consume one {}", elem);
     }
 }
 
-void produce_consume()
+void produce_consume_spd()
 {
-    // reset consumed count
-    consumed = 0;
-    auto start = std::chrono::system_clock::now();
-    std::thread t1(produceThread);
-    std::thread t2(consumeThread);
-    while (consumed < MESSAGE_COUNT)
-    {
-        mainLog->info("wait for end");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        mainLog->info("consumed:{}", consumed);
-    }
+    std::thread t1(produceThreadSpd);
+    std::thread t2(consumeThreadSpd);
     t1.join();
     t2.join();
-    auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff = end - start;
-    mainLog->info("consumed:{} in {}s rate:{}msg/s", consumed, diff.count(), consumed / diff.count());
+}
+
+void produceThreadStdIO()
+{
+    produceLog->info("start");
+    for (auto i = 0; i < MESSAGE_COUNT; i++)
+    {
+        std::cout << "Produce one " << i << std::endl;
+        syncQueue.push(i);
+    }
+}
+
+void consumeThreadStdIO()
+{
+    consumeLog->info("start");
+    for (auto i = 0; i < MESSAGE_COUNT; i++)
+    {
+        auto elem = syncQueue.pop();
+        std::cout << "Consume one " << elem << std::endl;
+    }
+}
+
+void produce_consume_std_io()
+{
+    std::thread t1(produceThreadStdIO);
+    std::thread t2(consumeThreadStdIO);
+    t1.join();
+    t2.join();
 }
 
 int main()
 {
     mainLog->info("start");
 
-    mainLog->info("produce consume log all");
-    produce_consume();
+    mainLog->info("produce consume log stdio");
+    auto start = std::chrono::system_clock::now();
+    produce_consume_std_io();
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff_spd_stdio = end - start;
 
-    mainLog->info("produce consume log only main");
+    mainLog->info("let the CPU rest a bit");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    mainLog->info("produce consume log spd all");
+    start = std::chrono::system_clock::now();
+    produce_consume_spd();
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff_spd_all = end - start;
+
+    mainLog->info("let the CPU rest a bit");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    mainLog->info("produce consume log spd only main");
     produceLog->set_level(spdlog::level::warn);
     consumeLog->set_level(spdlog::level::warn);
-    produce_consume();
+    start = std::chrono::system_clock::now();
+    produce_consume_spd();
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff_spd_main_only = end - start;
+
+    mainLog->info(
+        "stdio messages consumed:{} in {}s rate:{}msg/s",
+        MESSAGE_COUNT, diff_spd_stdio.count(), MESSAGE_COUNT / diff_spd_stdio.count());
+    mainLog->info(
+        "spd all messages consumed:{} in {}s rate:{}msg/s",
+        MESSAGE_COUNT, diff_spd_all.count(), MESSAGE_COUNT / diff_spd_all.count());
+    mainLog->info(
+        "spd main only messages consumed:{} in {}s rate:{}msg/s",
+        MESSAGE_COUNT, diff_spd_main_only.count(), MESSAGE_COUNT / diff_spd_main_only.count());
+
     return 0;
 }
