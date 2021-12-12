@@ -16,8 +16,8 @@ auto mainLog = spdlog::stdout_logger_st("main");
 auto produceLog = spdlog::stdout_logger_st("produce");
 auto consumeLog = spdlog::stdout_logger_st("consume");
 
-constexpr auto MESSAGE_COUNT = 1000000;
-int consumed = 0;
+constexpr auto MESSAGE_COUNT = 1000000ul;
+auto consumed = 0ul;
 
 template <typename T>
 class SynchronizedQueue
@@ -56,7 +56,7 @@ SynchronizedQueue<int> syncQueue;
 void produceThread()
 {
     produceLog->info("start");
-    for (int i = 0; i < MESSAGE_COUNT; i++)
+    for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
         produceLog->info("Produce one i:{}", i);
         syncQueue.push(i);
@@ -66,7 +66,7 @@ void produceThread()
 void consumeThread()
 {
     consumeLog->info("start");
-    for (int i = 0; i < MESSAGE_COUNT; i++)
+    for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
         auto elem = syncQueue.pop();
         consumeLog->info("Consuming one {}", elem);
@@ -74,9 +74,10 @@ void consumeThread()
     }
 }
 
-int main()
+void produce_consume()
 {
-    mainLog->info("started");
+    // reset consumed count
+    consumed = 0;
     auto start = std::chrono::system_clock::now();
     std::thread t1(produceThread);
     std::thread t2(consumeThread);
@@ -91,5 +92,18 @@ int main()
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start;
     mainLog->info("consumed:{} in {}s rate:{}msg/s", consumed, diff.count(), consumed / diff.count());
+}
+
+int main()
+{
+    mainLog->info("start");
+
+    mainLog->info("produce consume log all");
+    produce_consume();
+
+    mainLog->info("produce consume log only main");
+    produceLog->set_level(spdlog::level::warn);
+    consumeLog->set_level(spdlog::level::warn);
+    produce_consume();
     return 0;
 }
