@@ -5,9 +5,9 @@
 #include <stdexcept>
 #include <queue>
 #include <iostream>
-#include "spdlog/sinks/stdout_sinks.h"
 
-using namespace std;
+// spdlogger
+#include "spdlog/sinks/stdout_sinks.h"
 
 std::mutex g_mutex;
 std::condition_variable g_cv;

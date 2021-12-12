@@ -1,3 +1,4 @@
-consume_produce
+consume_produce*
 spdlog*
+fmtlog*
 .vscode*
