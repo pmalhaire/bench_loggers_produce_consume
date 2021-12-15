@@ -28,25 +28,36 @@ Consolidate compiler generated dependencies of target example
 [100%] Built target example
 ...
 ## run sample spd ##
-[2021-12-12 21:52:44.670] [consume] [info] Consume one 999995
-[2021-12-12 21:52:44.670] [consume] [info] Consume one 999996
-[2021-12-12 21:52:44.670] [consume] [info] Consume one 999997
-[2021-12-12 21:52:44.670] [consume] [info] Consume one 999998
-[2021-12-12 21:52:44.670] [consume] [info] Consume one 999999
-[2021-12-12 21:52:44.670] [main] [info] let the CPU rest a bit
-[2021-12-12 21:52:45.670] [main] [info] produce consume log spd only main
-[2021-12-12 21:52:46.240] [main] [info] stdio messages consumed:1000000 in 9.237613856s rate:108253.06357122534msg/s
-[2021-12-12 21:52:46.240] [main] [info] spd all messages consumed:1000000 in 7.250905824s rate:137913.80336096336msg/s
-[2021-12-12 21:52:46.240] [main] [info] spd main only messages consumed:1000000 in 0.569752775s rate:1755147.2215295485msg/s
+[2021-12-15 08:31:23.672] [consume] [info] Consume one 999995
+[2021-12-15 08:31:23.672] [consume] [info] Consume one 999996
+[2021-12-15 08:31:23.672] [consume] [info] Consume one 999997
+[2021-12-15 08:31:23.672] [consume] [info] Consume one 999998
+[2021-12-15 08:31:23.672] [consume] [info] Consume one 999999
+[2021-12-15 08:31:23.673] [main] [info] let the CPU rest a bit
+[2021-12-15 08:31:24.673] [main] [info] produce consume log spd only main
+[2021-12-15 08:31:25.419] [main] [info] stdio messages consumed:1000000 in 9.53895104s rate:104833.32976620457msg/s
+[2021-12-15 08:31:25.419] [main] [info] spd all messages consumed:1000000 in 8.908479259s rate:112252.6046170817msg/s
+[2021-12-15 08:31:25.419] [main] [info] spd main only messages consumed:1000000 in 0.746523631s rate:1339542.3245483304msg/s
 ## run sample fmt ##
-21:52:56.629561 main_fmt.cpp:73  INF[consume] Consume one 43684
-21:52:56.629565 main_fmt.cpp:73  INF[consume] Consume one 43685
-21:52:56.629566 main_fmt.cpp:73  INF[consume] Consume one 43686
-21:52:56.629566 main_fmt.cpp:73  INF[consume] Consume one 43687
-21:52:56.629567 main_fmt.cpp:73  INF[consume] Consume one 43688
-21:52:57.258628 main_fmt.cpp:134 INF[main  ] let the CPU rest a bit
-21:52:58.258711 main_fmt.cpp:137 INF[main  ] produce consume log fmt only main
-21:52:58.757748 main_fmt.cpp:145 INF[main  ] stdio messages consumed:1000000 in 9.298271486s rate:107546.87056682052msg/s
-21:52:58.757750 main_fmt.cpp:148 INF[main  ] fmt all messages consumed:1000000 in 0.706428345s rate:1415571.7378526197msg/s
-21:52:58.757750 main_fmt.cpp:151 INF[main  ] fmt main only messages consumed:1000000 in 0.499038544s rate:2003853.233428799msg/s
+08:31:35.828373 main_fmt.cpp:73  INF[consume] Consume one 43684
+08:31:35.828374 main_fmt.cpp:73  INF[consume] Consume one 43685
+08:31:35.828375 main_fmt.cpp:73  INF[consume] Consume one 43686
+08:31:35.828376 main_fmt.cpp:73  INF[consume] Consume one 43687
+08:31:35.828376 main_fmt.cpp:73  INF[consume] Consume one 43688
+08:31:36.424603 main_fmt.cpp:134 INF[main  ] let the CPU rest a bit
+08:31:37.424731 main_fmt.cpp:137 INF[main  ] produce consume log fmt only main
+08:31:38.050238 main_fmt.cpp:145 INF[main  ] stdio messages consumed:1000000 in 9.29825253s rate:107547.08981860703msg/s
+08:31:38.050240 main_fmt.cpp:148 INF[main  ] fmt all messages consumed:1000000 in 0.693208817s rate:1442566.7641212358msg/s
+08:31:38.050241 main_fmt.cpp:151 INF[main  ] fmt main only messages consumed:1000000 in 0.625498893s rate:1598723.8525776258msg/s
+## run sample easy ##
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999993
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999994
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999995
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999996
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999997
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999998
+2021-12-15 08:33:10,965 INFO [default] consume:Consume one 999999
+Main:stdio messages consumed:1000000 in 9.39358s rate:106456msg/s
+Main:easy_all messages consumed:1000000 in 41.0912s rate:24336.1msg/s
+Main:easy_main_only messages consumed:1000000 in 40.1452s rate:24909.6msg/s
 ```
