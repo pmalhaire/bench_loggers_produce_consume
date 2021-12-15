@@ -9,5 +9,6 @@ if [ ! -d fmtlog ]; then
     cd -
 fi
 
-cd fmtlog
-./build.sh
+# build logger optional
+# cd fmtlog
+# ./build.sh

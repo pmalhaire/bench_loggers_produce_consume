@@ -1,4 +1,5 @@
 consume_produce*
 spdlog*
 fmtlog*
+easyloggingpp*
 .vscode*

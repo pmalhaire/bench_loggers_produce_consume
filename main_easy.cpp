@@ -6,16 +6,14 @@
 #include <queue>
 #include <iostream>
 
-// spdlogger
-#include "spdlog/sinks/stdout_sinks.h"
+#define ELPP_THREAD_SAFE 1
+#include "easylogging++.h"
+
+INITIALIZE_EASYLOGGINGPP
 
 std::mutex g_mutex;
 std::condition_variable g_cv;
 bool g_ready = false;
-
-auto mainLog = spdlog::stdout_logger_st("main");
-auto produceLog = spdlog::stdout_logger_st("produce");
-auto consumeLog = spdlog::stdout_logger_st("consume");
 
 constexpr auto MESSAGE_COUNT = 1000000ul;
 
@@ -53,30 +51,34 @@ public:
 
 SynchronizedQueue<int> syncQueue;
 
-void produceThreadSpd()
+void produceThreadEasy()
 {
-    produceLog->info("start");
+    LOG(INFO) << "produce:"
+              << "Produce start";
     for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
-        produceLog->info("Produce one i:{}", i);
+        LOG(INFO) << "produce:"
+                  << "Produce one " << i;
         syncQueue.push(i);
     }
 }
 
-void consumeThreadSpd()
+void consumeThreadEasy()
 {
-    consumeLog->info("start");
+    LOG(INFO) << "consume:"
+              << "Consume start";
     for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
         auto elem = syncQueue.pop();
-        consumeLog->info("Consume one {}", elem);
+        LOG(INFO) << "consume:"
+                  << "Consume one " << elem;
     }
 }
 
-void produce_consume_spd()
+void produce_consume_easy()
 {
-    std::thread t1(produceThreadSpd);
-    std::thread t2(consumeThreadSpd);
+    std::thread t1(produceThreadEasy);
+    std::thread t2(consumeThreadEasy);
     t1.join();
     t2.join();
 }
@@ -111,43 +113,58 @@ void produce_consume_std_io()
 
 int main()
 {
-    mainLog->info("start");
+    el::Configurations defaultConf;
+    defaultConf.setToDefault();
+    defaultConf.set(el::Level::Info,
+                    el::ConfigurationType::Format, "%datetime %level %msg");
+    // default logger uses default configurations
+    el::Loggers::reconfigureLogger("default", defaultConf);
+    LOG(INFO) << "Main"
+              << "start";
 
-    mainLog->info("produce consume log stdio");
+    LOG(INFO) << "Main"
+              << "produce consume log stdio";
     auto start = std::chrono::system_clock::now();
     produce_consume_std_io();
     auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_spd_stdio = end - start;
+    std::chrono::duration<double> diff_easy_stdio = end - start;
 
-    mainLog->info("let the CPU rest a bit");
+    LOG(INFO) << "Main"
+              << "let the CPU rest a bit";
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    mainLog->info("produce consume log spd all");
+    LOG(INFO) << "Main"
+              << "produce consume log easy all";
     start = std::chrono::system_clock::now();
-    produce_consume_spd();
+    produce_consume_easy();
     end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_spd_all = end - start;
+    std::chrono::duration<double> diff_easy_all = end - start;
 
-    mainLog->info("let the CPU rest a bit");
+    LOG(INFO) << "Main"
+              << "let the CPU rest a bit";
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    mainLog->info("produce consume log spd only main");
-    produceLog->set_level(spdlog::level::warn);
-    consumeLog->set_level(spdlog::level::warn);
+    LOG(INFO) << "Main"
+              << "produce consume log easy only main";
+    defaultConf.setToDefault();
+    defaultConf.set(el::Level::Warning,
+                    el::ConfigurationType::Format, "%datetime %level %msg");
+    // default logger uses default configurations
+    el::Loggers::reconfigureLogger("default", defaultConf);
+
     start = std::chrono::system_clock::now();
-    produce_consume_spd();
+    produce_consume_easy();
     end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_spd_main_only = end - start;
 
-    mainLog->info(
-        "stdio messages consumed:{} in {}s rate:{}msg/s",
-        MESSAGE_COUNT, diff_spd_stdio.count(), MESSAGE_COUNT / diff_spd_stdio.count());
-    mainLog->info(
-        "spd all messages consumed:{} in {}s rate:{}msg/s",
-        MESSAGE_COUNT, diff_spd_all.count(), MESSAGE_COUNT / diff_spd_all.count());
-    mainLog->info(
-        "spd main only messages consumed:{} in {}s rate:{}msg/s",
-        MESSAGE_COUNT, diff_spd_main_only.count(), MESSAGE_COUNT / diff_spd_main_only.count());
-
+    std::chrono::duration<double> diff_easy_main_only = end - start;
+    std::cout << "Main:"
+              << "stdio messages consumed:{} in {}s rate:{}msg/s" << MESSAGE_COUNT,
+        diff_easy_stdio.count(), MESSAGE_COUNT / diff_easy_stdio.count();
+    std::cout << "Main:"
+              << "easy all messages consumed:{} in {}s rate:{}msg/s" << MESSAGE_COUNT,
+        diff_easy_all.count(), MESSAGE_COUNT / diff_easy_all.count();
+    std::cout << "Main:"
+              << "easy main only messages consumed:{} in {}s rate:{}msg/s" << MESSAGE_COUNT,
+        diff_easy_main_only.count(), MESSAGE_COUNT / diff_easy_main_only.count();
     return 0;
 }
