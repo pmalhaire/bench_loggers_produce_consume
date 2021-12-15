@@ -158,13 +158,16 @@ int main()
 
     std::chrono::duration<double> diff_easy_main_only = end - start;
     std::cout << "Main:"
-              << "stdio messages consumed:{} in {}s rate:{}msg/s" << MESSAGE_COUNT,
-        diff_easy_stdio.count(), MESSAGE_COUNT / diff_easy_stdio.count();
+              << "stdio messages consumed:" << MESSAGE_COUNT << " in " << diff_easy_stdio.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_easy_stdio.count() << "msg/s" << std::endl;
     std::cout << "Main:"
-              << "easy all messages consumed:{} in {}s rate:{}msg/s" << MESSAGE_COUNT,
-        diff_easy_all.count(), MESSAGE_COUNT / diff_easy_all.count();
+              << "easy_all messages consumed:" << MESSAGE_COUNT << " in " << diff_easy_all.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_easy_all.count() << "msg/s" << std::endl;
+    ;
     std::cout << "Main:"
-              << "easy main only messages consumed:{} in {}s rate:{}msg/s" << MESSAGE_COUNT,
-        diff_easy_main_only.count(), MESSAGE_COUNT / diff_easy_main_only.count();
+              << "easy_main_only messages consumed:" << MESSAGE_COUNT << " in " << diff_easy_main_only.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_easy_main_only.count() << "msg/s" << std::endl;
+    ;
+
     return 0;
 }

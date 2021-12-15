@@ -18,7 +18,7 @@ echo_title "build fmt sample"
 g++ --std=c++17 -o consume_produce_fmt -I fmtlog main_fmt.cpp -lpthread
 
 echo_title "build easyloggingpp sample"
-g++ --std=c++17 -o consume_produce_easy easyloggingpp/src/easylogging++.cc main_easy.cpp -lpthread -I easyloggingpp/src
+g++ --std=c++17 -o consume_produce_easy -D ELPP_THREAD_SAFE easyloggingpp/src/easylogging++.cc main_easy.cpp -lpthread -I easyloggingpp/src
 
 
 echo_title "run sample spd"
