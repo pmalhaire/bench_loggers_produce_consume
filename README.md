@@ -69,5 +69,5 @@ Main:easy_main_only messages consumed:1000000 in 40.1452s rate:24909.6msg/s
 17:54:40.420493855 [483038] main_quill.cpp:73            LOG_INFO      consume      - Consume one 999998
 17:54:40.420494123 [483038] main_quill.cpp:73            LOG_INFO      consume      - Consume one 999999
 17:54:41.420658188 [482799] main_quill.cpp:161           LOG_INFO      root         - stdio messages consumed:1000000 in 7.89300005s rate:126694.53866277373msg/s
-17:54:41.420659240 [482799] main_quill.cpp:164           LOG_INFO      root         - stdio messages consumed:1000000 in 0.325476963s rate:3072414.0682116416msg/s
+17:54:41.420659240 [482799] main_quill.cpp:164           LOG_INFO      root         - quill messages consumed:1000000 in 0.325476963s rate:3072414.0682116416msg/s
 ```

@@ -162,7 +162,7 @@ int main()
              "stdio messages consumed:{} in {}s rate:{}msg/s",
              MESSAGE_COUNT, diff_quill_stdio.count(), MESSAGE_COUNT / diff_quill_stdio.count());
     LOG_INFO(logger,
-             "stdio messages consumed:{} in {}s rate:{}msg/s",
+             "quill messages consumed:{} in {}s rate:{}msg/s",
              MESSAGE_COUNT, diff_quill_all.count(), MESSAGE_COUNT / diff_quill_all.count());
     ;
     // std::cout << "Main:"
