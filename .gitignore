@@ -2,5 +2,6 @@ consume_produce*
 spdlog*
 fmtlog*
 quill*
+g3log*
 easyloggingpp*
 .vscode*

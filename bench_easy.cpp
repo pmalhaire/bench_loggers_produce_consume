@@ -16,6 +16,7 @@ std::condition_variable g_cv;
 bool g_ready = false;
 
 constexpr auto MESSAGE_COUNT = 1000000ul;
+constexpr auto loggerName = "easyloggercpp";
 
 template <typename T>
 class SynchronizedQueue
@@ -51,7 +52,7 @@ public:
 
 SynchronizedQueue<int> syncQueue;
 
-void produceThreadEasy()
+void produceThread()
 {
     LOG(INFO) << "produce:"
               << "Produce start";
@@ -63,7 +64,7 @@ void produceThreadEasy()
     }
 }
 
-void consumeThreadEasy()
+void consumeThread()
 {
     LOG(INFO) << "consume:"
               << "Consume start";
@@ -75,10 +76,10 @@ void consumeThreadEasy()
     }
 }
 
-void produce_consume_easy()
+void produce_consume()
 {
-    std::thread t1(produceThreadEasy);
-    std::thread t2(consumeThreadEasy);
+    std::thread t1(produceThread);
+    std::thread t2(consumeThread);
     t1.join();
     t2.join();
 }
@@ -119,33 +120,28 @@ int main()
                     el::ConfigurationType::Format, "%datetime %level %msg");
     // default logger uses default configurations
     el::Loggers::reconfigureLogger("default", defaultConf);
-    LOG(INFO) << "Main"
-              << "start";
 
-    LOG(INFO) << "Main"
-              << "produce consume log stdio";
+    std::cerr << "produce consume log stdio" << std::endl;
     auto start = std::chrono::system_clock::now();
     produce_consume_std_io();
     auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_easy_stdio = end - start;
+    std::chrono::duration<double> diff_stdio = end - start;
 
-    LOG(INFO) << "Main"
-              << "let the CPU rest a bit";
+    std::cerr << "let the CPU rest a bit" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    LOG(INFO) << "Main"
-              << "produce consume log easy all";
+    std::cerr << "produce consume log all" << std::endl;
     start = std::chrono::system_clock::now();
-    produce_consume_easy();
+    produce_consume();
     end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_easy_all = end - start;
+    std::chrono::duration<double> diff_all = end - start;
 
-    LOG(INFO) << "Main"
-              << "let the CPU rest a bit";
+    std::cerr << "let the CPU rest a bit" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    LOG(INFO) << "Main"
-              << "produce consume log easy only main";
+    std::cerr << "produce consume log none" << std::endl;
+
+    // set logger to warning
     defaultConf.setToDefault();
     defaultConf.set(el::Level::Warning,
                     el::ConfigurationType::Format, "%datetime %level %msg");
@@ -153,21 +149,15 @@ int main()
     el::Loggers::reconfigureLogger("default", defaultConf);
 
     start = std::chrono::system_clock::now();
-    produce_consume_easy();
+    produce_consume();
     end = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> diff_easy_main_only = end - start;
-    std::cout << "Main:"
-              << "stdio messages consumed:" << MESSAGE_COUNT << " in " << diff_easy_stdio.count() << "s"
-              << " rate:" << MESSAGE_COUNT / diff_easy_stdio.count() << "msg/s" << std::endl;
-    std::cout << "Main:"
-              << "easy_all messages consumed:" << MESSAGE_COUNT << " in " << diff_easy_all.count() << "s"
-              << " rate:" << MESSAGE_COUNT / diff_easy_all.count() << "msg/s" << std::endl;
-    ;
-    std::cout << "Main:"
-              << "easy_main_only messages consumed:" << MESSAGE_COUNT << " in " << diff_easy_main_only.count() << "s"
-              << " rate:" << MESSAGE_COUNT / diff_easy_main_only.count() << "msg/s" << std::endl;
-    ;
-
+    std::chrono::duration<double> diff_none = end - start;
+    std::cerr << "stdio messages consumed:" << MESSAGE_COUNT << " in " << diff_stdio.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_stdio.count() << "msg/s" << std::endl;
+    std::cerr << loggerName << ":all messages consumed:" << MESSAGE_COUNT << " in " << diff_all.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_all.count() << "msg/s" << std::endl;
+    std::cerr << loggerName << ":none messages consumed:" << MESSAGE_COUNT << " in " << diff_none.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_none.count() << "msg/s" << std::endl;
     return 0;
 }

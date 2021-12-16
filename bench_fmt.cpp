@@ -17,6 +17,7 @@ std::condition_variable g_cv;
 bool g_ready = false;
 
 constexpr auto MESSAGE_COUNT = 1000000ul;
+constexpr auto loggerName = "fmt";
 
 template <typename T>
 class SynchronizedQueue
@@ -52,7 +53,7 @@ public:
 
 SynchronizedQueue<int> syncQueue;
 
-void produceThreadFmt()
+void produceThread()
 {
     fmtlog::setThreadName("produce");
     logi("start");
@@ -63,7 +64,7 @@ void produceThreadFmt()
     }
 }
 
-void consumeThreadFmt()
+void consumeThread()
 {
     fmtlog::setThreadName("consume");
     logi("start");
@@ -74,10 +75,10 @@ void consumeThreadFmt()
     }
 }
 
-void produce_consume_fmt()
+void produce_consume()
 {
-    std::thread t1(produceThreadFmt);
-    std::thread t2(consumeThreadFmt);
+    std::thread t1(produceThread);
+    std::thread t2(consumeThread);
     t1.join();
     t2.join();
 }
@@ -113,44 +114,40 @@ void produce_consume_std_io()
 
 int main()
 {
-    fmtlog::setThreadName("main");
-    logi("start");
-
-    logi("produce consume log stdio");
+    std::cerr << "produce consume log stdio" << std::endl;
     auto start = std::chrono::system_clock::now();
     produce_consume_std_io();
     auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_fmt_stdio = end - start;
+    std::chrono::duration<double> diff_stdio = end - start;
 
-    logi("let the CPU rest a bit");
+    std::cerr << "let the CPU rest a bit" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    logi("produce consume log fmt all");
+    std::cerr << "produce consume log all" << std::endl;
     start = std::chrono::system_clock::now();
-    produce_consume_fmt();
+    produce_consume();
     end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_fmt_all = end - start;
+    std::chrono::duration<double> diff_all = end - start;
 
-    logi("let the CPU rest a bit");
+    std::cerr << "let the CPU rest a bit" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    logi("produce consume log fmt only main");
+    std::cerr << "produce consume log none" << std::endl;
+
+    // set logger to warning
     fmtlog::setLogLevel(fmtlog::WRN);
-    start = std::chrono::system_clock::now();
-    produce_consume_fmt();
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_fmt_main_only = end - start;
 
-    fmtlog::setLogLevel(fmtlog::INF);
-    logi(
-        "stdio messages consumed:{} in {}s rate:{}msg/s",
-        MESSAGE_COUNT, diff_fmt_stdio.count(), MESSAGE_COUNT / diff_fmt_stdio.count());
-    logi(
-        "fmt all messages consumed:{} in {}s rate:{}msg/s",
-        MESSAGE_COUNT, diff_fmt_all.count(), MESSAGE_COUNT / diff_fmt_all.count());
-    logi(
-        "fmt main only messages consumed:{} in {}s rate:{}msg/s",
-        MESSAGE_COUNT, diff_fmt_main_only.count(), MESSAGE_COUNT / diff_fmt_main_only.count());
+    start = std::chrono::system_clock::now();
+    produce_consume();
+    end = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> diff_none = end - start;
+    std::cerr << "stdio messages consumed:" << MESSAGE_COUNT << " in " << diff_stdio.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_stdio.count() << "msg/s" << std::endl;
+    std::cerr << loggerName << ":all messages consumed:" << MESSAGE_COUNT << " in " << diff_all.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_all.count() << "msg/s" << std::endl;
+    std::cerr << loggerName << ":none messages consumed:" << MESSAGE_COUNT << " in " << diff_none.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_none.count() << "msg/s" << std::endl;
     fmtlog::poll();
     return 0;
 }

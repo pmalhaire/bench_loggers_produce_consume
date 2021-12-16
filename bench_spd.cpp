@@ -6,13 +6,19 @@
 #include <queue>
 #include <iostream>
 
-#include "quill/Quill.h"
+// spdlogger
+#include "spdlog/sinks/stdout_sinks.h"
 
 std::mutex g_mutex;
 std::condition_variable g_cv;
 bool g_ready = false;
 
+auto mainLog = spdlog::stdout_logger_st("main");
+auto produceLog = spdlog::stdout_logger_st("produce");
+auto consumeLog = spdlog::stdout_logger_st("consume");
+
 constexpr auto MESSAGE_COUNT = 1000000ul;
+constexpr auto loggerName = "spd";
 
 template <typename T>
 class SynchronizedQueue
@@ -47,32 +53,25 @@ public:
 };
 
 SynchronizedQueue<int> syncQueue;
-auto lvl = quill::LogLevel::Info;
 
 void produceThread()
 {
-    quill::Logger *log(quill::create_logger("produce"));
-    log->set_log_level(lvl);
-    LOG_INFO(log, "start");
+    produceLog->info("start");
     for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
-        LOG_INFO(log, "Produce one i:{}", i);
+        produceLog->info("Produce one i:{}", i);
         syncQueue.push(i);
     }
-    //delete log;
 }
 
 void consumeThread()
 {
-    quill::Logger *log(quill::create_logger("consume"));
-    log->set_log_level(lvl);
-    LOG_INFO(log, "start");
+    consumeLog->info("start");
     for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
         auto elem = syncQueue.pop();
-        LOG_INFO(log, "Consume one {}", elem);
+        consumeLog->info("Consume one {}", elem);
     }
-    //delete log;
 }
 
 void produce_consume()
@@ -95,7 +94,6 @@ void produceThreadStdIO()
 
 void consumeThreadStdIO()
 {
-
     std::cout << "Consume start" << std::endl;
     for (auto i = 0; i < MESSAGE_COUNT; i++)
     {
@@ -114,60 +112,40 @@ void produce_consume_std_io()
 
 int main()
 {
-    quill::enable_console_colours();
-    quill::start();
-
-    quill::Logger *logger = quill::get_logger();
-    logger->set_log_level(quill::LogLevel::TraceL3);
-
-    // enable a backtrace that will get flushed when we log CRITICAL
-    logger->init_backtrace(2, quill::LogLevel::Critical);
-
-    std::cout << "Main:"
-                 "produce consume log stdio"
-              << std::endl;
+    std::cerr << "produce consume log stdio" << std::endl;
     auto start = std::chrono::system_clock::now();
     produce_consume_std_io();
     auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_quill_stdio = end - start;
+    std::chrono::duration<double> diff_stdio = end - start;
 
-    std::cout << "Main:"
-                 "let the CPU rest a bit"
-              << std::endl;
+    std::cerr << "let the CPU rest a bit" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    std::cout << "Main:"
-                 "produce consume log quill all"
-              << std::endl;
+    std::cerr << "produce consume log all" << std::endl;
     start = std::chrono::system_clock::now();
     produce_consume();
     end = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff_quill_all = end - start;
+    std::chrono::duration<double> diff_all = end - start;
 
-    std::cout << "Main:"
-                 "let the CPU rest a bit"
-              << std::endl;
+    std::cerr << "let the CPU rest a bit" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    std::cout << "Main:"
-                 "produce consume log quill only main"
-              << std::endl;
-    //lvl = quill::LogLevel::Warning;
-    // start = std::chrono::system_clock::now();
-    // produce_consume();
-    // end = std::chrono::system_clock::now();
-    // std::chrono::duration<double> diff_quill_main_only = end - start;
+    std::cerr << "produce consume log none" << std::endl;
 
-    LOG_INFO(logger,
-             "stdio messages consumed:{} in {}s rate:{}msg/s",
-             MESSAGE_COUNT, diff_quill_stdio.count(), MESSAGE_COUNT / diff_quill_stdio.count());
-    LOG_INFO(logger,
-             "quill messages consumed:{} in {}s rate:{}msg/s",
-             MESSAGE_COUNT, diff_quill_all.count(), MESSAGE_COUNT / diff_quill_all.count());
-    ;
-    // std::cout << "Main:"
-    //           << "quill_main_only messages consumed:" << MESSAGE_COUNT << " in " << diff_quill_main_only.count() << "s"
-    //           << " rate:" << MESSAGE_COUNT / diff_quill_main_only.count() << "msg/s" << std::endl;
-    // ;
+    // set logger to warning
+    produceLog->set_level(spdlog::level::warn);
+    consumeLog->set_level(spdlog::level::warn);
+
+    start = std::chrono::system_clock::now();
+    produce_consume();
+    end = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> diff_none = end - start;
+    std::cerr << "stdio messages consumed:" << MESSAGE_COUNT << " in " << diff_stdio.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_stdio.count() << "msg/s" << std::endl;
+    std::cerr << loggerName << ":all messages consumed:" << MESSAGE_COUNT << " in " << diff_all.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_all.count() << "msg/s" << std::endl;
+    std::cerr << loggerName << ":none messages consumed:" << MESSAGE_COUNT << " in " << diff_none.count() << "s"
+              << " rate:" << MESSAGE_COUNT / diff_none.count() << "msg/s" << std::endl;
     return 0;
 }
