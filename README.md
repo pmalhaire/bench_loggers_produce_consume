@@ -77,4 +77,5 @@ let the CPU rest a bit
 produce consume log none
 stdio messages consumed:1000000 in 3.04937s rate:327937msg/s
 g3log:all messages consumed:1000000 in 2.19713s rate:455138msg/s
-g3log:none messages consumed:1000000 in 2.13178s rate:469092msg/s```
+g3log:none messages consumed:1000000 in 2.13178s rate:469092msg/s
+```
